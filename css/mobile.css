@@ -1,0 +1,176 @@
+.rd {
+    display: none;
+}
+
+@media only screen 
+and (max-device-width: 1000px)
+{
+    .rd {
+        display: block !important;
+    }
+
+    #navigation {
+        height: 80px;
+        width: 100%;
+        border-bottom: 1px solid #444;
+    }
+    #navigation a#logoAccueil {
+        display: inline-block;
+        width: 80px;
+        vertical-align: top;
+    }
+    #navigation a#logoAccueil img {
+        height: 60px;
+    }
+    #navigation #loginBox {
+        display: inline-block;
+        vertical-align: top;
+        padding: 0 10px;
+        padding-top: 15px;
+        margin: 0;
+        height: 79px;
+        line-height: 20px;
+        background: #fff;
+        border: 0 none;
+    }
+    #navigation #loginBox .profile {
+        display: none;
+    }
+    #navigation #loginBox span {
+        color: #444;
+        padding: 0;
+    }
+    #navigation #loginBox a#disconnect {
+        display: inline;
+        position: relative;
+        top: auto;
+        right: auto;
+    }
+    #navigation #loginBox a {
+
+    }
+    #navigation #nav-menu {
+        position: fixed;
+        left: 0;
+        top: 80px;
+        width: 100%;
+        height: calc(100% - 80px);
+        z-index: 500;        
+        background: #fff;
+        display: none;
+    }
+    #navigation #btnMenuMobile {
+        position: absolute;
+        right: 0;
+        top: 0;
+        height: 80px;
+        width: 80px;
+        font-size: 40px;
+        height: 79px;
+        background: #fff;
+    }
+
+
+
+
+
+
+    #page {
+        left: 0;
+        top: 80px;
+        width: 100%;
+        height: calc(100% - 80px);
+        z-index: 400;
+    }
+    #page #page-inner {
+        margin: 3px;
+        width: calc(100% - 6px);
+    }
+    #page #page-inner .card .card-body {
+        padding: 5px;
+    }
+
+
+
+    #page .filters {
+        background: #ddd;
+        border: 1px solid #444;
+        padding: 6px;
+    }
+    #page .filters form.form-inline {
+        
+    }
+    #page .filters form.form-inline>*{
+        margin: 0 0 5px 0 !important;
+    }
+    #page h1.statsTitle {
+        font-size: 13px;
+    }
+    #page table.table {
+        max-width: 100%;
+    }
+
+    #page #statsRezWrapper h2.chartsTitle,
+    #page #statsRezWrapper h5,
+    #page #statsRezWrapper canvas {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        opacity: 0 !important;
+    }
+
+    #page #statsRezWrapper .row>div:first-child {
+        width: 100% !important;
+        max-width: 100% !important;
+        display: block;
+        flex: none;
+    }
+
+
+    #page #vTable-wrapper #filtersDiv>div {
+        width: 100%;
+        max-width: 100%;
+        flex: none;
+        margin: 0 0 5px 0 !important;
+    }
+    #page #vTable-wrapper #filtersDiv>div .mb-3 {
+        margin: 0 !important;
+    }
+
+
+    #page #listOpWrapper {
+        max-width: 100% !important;
+    }
+
+    #page #mailbox {
+        display: none;
+    }
+    #page #mailboxDisclaimer {
+        text-align: center;
+        margin-top: 100px;
+        color: #444;
+        font-style: italic;
+    }
+
+
+    .adminNavBar {
+        float: left !important;
+        display: inline-block !important;
+        flex: none !important;
+    }
+    .adminNavBar ul {
+        display: inline !important;
+        flex: none  !important;
+        flex-direction: row  !important;
+    }
+    .adminNavBar ul li {
+        display: inline !important  ;
+        float: left !important;
+        margin-left: 15px !important;
+    }
+
+    #navigation #nav-menu a.nav-menu-link {
+        max-height: 50px;
+    }   
+
+}

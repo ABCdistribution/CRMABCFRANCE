@@ -1,0 +1,15 @@
+deploy_prod:
+  stage: deploy
+  tags:
+    - deploy  # ← ceci est indispensable
+  only:
+    - main
+  before_script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - echo "$PROD_SSH_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - ssh-keyscan $PROD_HOST >> ~/.ssh/known_hosts
+  script:
+    - echo "🚀 Déploiement sur le serveur de production"
+    - ssh root@$PROD_HOST "cd /var/www/gescom && git pull origin main"

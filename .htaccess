@@ -1,0 +1,16 @@
+Options +FollowSymlinks
+
+#AuthName "Espace en travaux"
+#AuthType Basic
+#AuthUserFile "/var/www/gescom/.htpasswd"
+#Require valid-user
+
+
+RewriteEngine On
+
+RewriteRule ^(css|lib|js|img|snew.png|datas|u.png|dist|scripts)($|/) - [L]
+
+# 2. AJOUTE CETTE LIGNE ICI : On ignore spécifiquement l'API Tracky
+RewriteRule ^api/tracky\.php$ - [L]
+
+RewriteRule ^(.*) index.php?URI_STRING=$1 [QSA,L]

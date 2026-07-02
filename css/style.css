@@ -1,0 +1,525 @@
+.nav-treeview>.nav-item>.nav-link.active {
+	background: transparent !important;
+	color: #fff !important;
+}
+.nav-treeview>.nav-item>.nav-link.active i {
+	transition:all 0.5s ease-in-out;
+	animation:blink normal 1s infinite ease-in-out;
+}
+
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.2;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.rel {
+	position: relative;
+}
+
+#mobile .btn-group {
+	width: 100%;
+}
+#mobile .btn-group button.btn {
+	border-radius: 0;
+	width: 33.33%;
+	position: relative;
+}
+
+#mobileMenu button.btn.btn-primary:after {
+	top: 100%;
+	left: 50%;
+	border: solid transparent;
+	content: " ";
+	height: 0;
+	width: 0;
+	position: absolute;
+	pointer-events: none;
+	border-color: rgba(136, 183, 213, 0);
+	border-top-color: #007bff;
+	border-width: 8px;
+	margin-left: -8px;
+}
+
+#mobile .mobileContentTab {
+	display: none;
+}
+#mobile .mobileContentTab.activeTab {
+	display: block;
+}
+
+
+
+@media (max-width:1200px) {
+	.nomobile {
+		display: none !important;
+	}
+}
+
+
+.isLink {
+	cursor: pointer;
+}
+
+
+
+.alertBar .alert {
+	background: #000;
+	padding: 0;
+	margin: 3px auto;
+	width: 100%;
+	border-radius: 0;
+	cursor: pointer;
+}
+.alertBar .alert .alert-title {
+	background: #000;
+	opacity: 0.5;
+	color: #fff;
+	font-size: 11px;
+	font-weight: bold;
+	display: block;
+	padding-left: 5px;
+	line-height: 18px;
+}
+.alertBar .alert .alert-title i {
+	margin-right: 6px;
+}
+.alertBar .alert .alert-content {
+	font-size: 11px;
+	color: #fff;
+	padding: 5px;
+	line-height: 16px;
+	margin: 0;
+}
+table.table td.actions a.btn {
+	margin-right: 4px;
+	display: inline-block;
+	overflow: auto;
+}
+table.table td {
+	vertical-align: middle;
+}
+table.nowrap td {
+	white-space: nowrap;
+}
+
+
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter,
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_paginate {
+	display: inline-block;
+	margin: 10px 0;
+	width: 50%;
+}
+.dataTables_wrapper .dataTables_filter,
+.dataTables_wrapper .dataTables_paginate {
+	text-align: right;
+}
+.dataTables_wrapper .dataTables_filter input {
+	margin-left: 10px;
+	border: 1px solid #555;
+	font-size: 12px;
+	color: #333;
+	padding: 0 5px;
+	line-height: 20px;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button  {
+	margin: 0 3px;
+	text-decoration: none;
+	border: 1px solid #999;
+	color: #999;
+	padding: 0 5px;
+	line-height: 20px;
+	cursor: pointer;
+}
+
+
+.nav-tabs {
+	border: 0 none;
+	margin-bottom: 15px;
+}
+.nav-tabs li {
+	margin-right: 15px;
+	background: transparent;
+
+}
+.nav-tabs li a {
+	padding: 0 10px;
+	line-height: 35px;
+	transition: all 0.3s ease;
+	color: #007bff;
+}
+.nav-tabs li a:hover,
+.nav-tabs li a.active {
+
+	background: #007bff;
+	color: #fff;
+}
+.nav-tabs li a {
+	color : inherit;
+}
+
+
+#as400Table {
+	font-size: 11px;
+}
+#as400Table th, #as400Table td {
+	padding: 2px;
+	line-height: 14px;
+	white-space: normal;
+	vertical-align: middle;
+}
+
+
+.card .card-header i {
+  margin-right: 15px;
+}
+.card .card-header .btn {
+	float: right;
+	margin: 0 8px;
+}
+.card .card-body h5 {
+	margin: 15px auto 30px auto;
+	height: 10px;
+	line-height: 10px;
+	text-align: center;
+	border-bottom: 1px solid #aaa;
+	color #aaa;
+	font-size: 12px;
+}
+.card .card-body h5 span {
+	display: inline-block;
+	height: 18px;
+	line-height: 18px;
+	background: #fff;
+	padding: 0 10px;
+	text-transform: uppercase;
+}
+
+.tc {
+	text-align: center !important;
+}
+
+i.ml {
+	margin-left: 15px;
+}
+.sizedBtn {
+	width: 80%;
+	margin: 10px auto;
+}
+.sizedBtn .btn {
+	width: 100%;
+}
+
+
+#loader {
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	z-index: 5000;
+	background: #000;
+	opacity: 0.5;
+}
+
+.rel {
+
+}
+.rel #loader {
+	position: absolute;
+	min-height: 250px;
+}
+
+.spinner-box {
+  width: 150px;
+  height: 150px;
+	position: fixed;
+	bottom: 20px;
+	right: 20px;
+  justify-content: center;
+  align-items: center;
+  background-color: transparent;
+	z-index: 5001;
+}
+
+.rel #loader .spinner-box {
+position: absolute;
+}
+
+.circle-border {
+  width: 150px;
+  height: 150px;
+  padding: 3px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  background: rgb(63,249,220);
+  background: linear-gradient(0deg, rgba(63,249,220,0.1) 33%, rgba(63,249,220,1) 100%);
+  animation: spin .8s linear 0s infinite;
+}
+
+.circle-core {
+  width: 100%;
+  height: 100%;
+  background-color: #1d2630;
+  border-radius: 50%;
+}
+@keyframes spin {
+  from {
+    transform: rotate(0);
+  }
+  to{
+    transform: rotate(359deg);
+  }
+}
+
+.table-condensed {
+	font-size: 12px;
+}
+.table-condensed td {
+	padding: 4px;
+}
+#vTable tbody tr:hover {
+	cursor: pointer;
+	background: #ddd;
+}
+#vTable td {
+	white-space: nowrap !important;
+}
+
+#page-visites i.fa-camera {
+	margin-left: 5px;
+}
+#vTable-wrapper .btn-group {
+	float: right;
+	margin: 10px 0;
+}
+#vTable-wrapper .btn-group button {
+	background: #fff;
+	color: #555;
+	border: 0 none;
+}
+#vTable-wrapper .btn-group button:hover,
+#vTable-wrapper .btn-group .selected {
+	background: #486a59;
+	color: #fff;
+}
+#disclaimer {
+	background: #486a59;
+	color: #fff;
+	text-transform: uppercase;
+	padding: 10px 0;
+	font-size: 15px;
+}
+#page-visites #today h4,
+#page-visites #today b {
+	color: #486a59;
+}
+
+
+#logsTable i {
+	float: right;
+	font-size: 10px;
+	font-style: normal;
+	color: #ddd;
+}
+#logsTable tr:hover i {
+	color: #333;
+	font-size: 12px;
+}
+
+table.t-mag thead tr th:nth-child(2),
+table.t-mag tbody tr td:nth-child(2) {
+	text-align: left;
+}
+
+.cardp {
+	margin: 5px;
+}
+.cardp p.card-text {
+	font-size: 13px;
+	line-height: 25px;
+	color: #444;
+}
+.cardp p.card-text i {
+	margin-right: 8px;
+	display: inline-block;
+	width: 15px;
+	text-align: center;
+}
+.cardp .todo {
+	background: #eee;
+	text-align: center;
+	text-transform: uppercase;
+	font-weight: bold;
+	line-height: 40px;
+	font-size: 13px;
+}
+.cardp.done {
+	border-color: green;
+}
+.cardp .todo.done {
+	background: green;
+	color: #fff;
+}
+
+.cardpTitle {
+	text-align: center;
+	font-size: 35px;
+	background: #eee;
+	line-height: 60px;
+	color: #888;
+	margin: 15px 0;
+	font-weight: bold;
+	border-bottom: 2px solid #aaa;
+}
+
+
+.numstep {
+	float: left;
+	height: 40px;
+	line-height: 40px;
+	font-size: 30px;
+	text-align: center;
+	width: 40px;
+	margin-right: 30px;
+	color: #ccc;
+}
+
+
+.legende {
+	background: #264d3a;
+	color: #fff;
+	font-size: 13px;
+	line-height: 18px;
+	padding: 10px;
+}
+
+
+#stratsWrapper details {
+	border: 1px solid #aaa;
+	padding: 10px;
+	box-shadow: 0 5px 5px #555;
+	transition: all 0.3s ease;
+	cursor: pointer;
+	background: #fff;
+	margin-bottom: 5px;
+}
+#stratsWrapper details:hover {
+	background: #ddd;
+	box-shadow: 0 5px 5px #000;
+}
+
+#stratsWrapper details summary {
+	font-size: 20px;
+	color: #555;
+	line-height: 35px;
+}
+#stratsWrapper details table.table {
+	width: 100%;
+	margin: 10px auto;
+}
+#stratsWrapper details table.table input {
+	border: 0 none;
+	background: #eee;
+	padding: 0 5px;
+	line-height: 30px;
+	max-width: 120px;
+	font-size: 12px;
+}
+
+.colisTd {
+	border: 1px solid #264d3a !important;
+	padding: 5px;
+}
+.colisCmd {
+	padding: 5px;
+	text-align: center;
+	font-size: 11px;
+	margin-bottom: 10px;
+}
+.colisCmd span.title {
+	margin-top: 10px;
+	background: #264d3a;
+	color: #fff;
+	line-height: 30px;
+	font-weight: bold;
+	display: block;
+}
+.colisCmd p {
+	font-weight: bold;
+}
+ul.colis {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+ul.colis li { 
+	margin: 0;
+	padding: 0;
+}
+
+
+#tradTable {
+	table-layout: fixed;
+}
+#tradTable tbody tr td {
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+#tradTable tbody tr td[contenteditable=true] {
+	background: #E8F5E9;
+	resize: both;
+}
+#tradTable tbody tr td:first-child {
+	background: #eee;
+	font-size: 13px;
+	font-weight: bold;
+	cursor: auto;
+}
+#formAddTrad {
+	width: 80%;
+	margin: 20px auto;
+	padding: 15px;
+	border: 1px solid #ddd;
+	box-shadow: 0 5px 5px #aaa;
+}
+
+#list-plannification {
+	max-height: 400px;
+	padding: 15px;
+	border: 1px solid #000;
+	overflow: auto;
+}
+
+
+.list-items .list-group-item h4 {
+	font-size: 12px;
+	margin: 0;
+}
+.list-items .list-group-item h4 .name {
+	font-weight: bold;
+}
+
+.list-items .list-group-item p {
+	margin: 0;
+}
+
+#notesversion ul {
+	margin: 0;
+	padding: 0;
+	margin-left: 10px;
+}
+#notesversion ul li {
+	line-height: 16px;
+	margin-bottom: 8px;
+}

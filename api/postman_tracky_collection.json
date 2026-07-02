@@ -1,0 +1,230 @@
+{
+  "info": {
+    "name": "Tracky API - Retours produits (Legacy Base64)",
+    "description": "Collection pour api/tracky.php au format Legacy CRM : entree/sortie via champ \"d\" = base64(JSON). 1) Auth pour obtenir le token. 2) GET : get_retours, get_magasins, get_produit (ean), get_stats, get_sync_data. 3) POST : sync retours (d = base64 du body JSON). Token : Bearer ou ?token= ou dans le payload d. Script de decodage base64 : voir donnees dans la Console et l'onglet Visualize.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "exec": [
+          "// Decode le champ 'd' (base64) pour afficher les donnees dans la Console et l'onglet Visualize",
+          "if (pm.response.code >= 200 && pm.response.code < 300) {",
+          "    try {",
+          "        const res = pm.response.json();",
+          "        if (res && typeof res.d === 'string') {",
+          "            const decoded = JSON.parse(atob(res.d));",
+          "            console.log('=== Tracky : donnees decodees (d) ===');",
+          "            console.log(JSON.stringify(decoded, null, 2));",
+          "            pm.collectionVariables.set('tracky_decoded', JSON.stringify(decoded, null, 2));",
+          "            const escaped = JSON.stringify(decoded, null, 2).replace(/</g, '&lt;').replace(/>/g, '&gt;');",
+          "            pm.visualizer.set('<html><body style=\"font-family:monospace;white-space:pre-wrap;padding:12px;\"><h3>Donnees decodees (d)</h3><pre>' + escaped + '</pre></body></html>', decoded);",
+          "        }",
+          "    } catch (e) {",
+          "        console.log('Tracky decode error:', e.message);",
+          "    }",
+          "}"
+        ],
+        "type": "text/javascript"
+      }
+    }
+  ],
+  "variable": [
+    { "key": "base_url", "value": "https://crm.abcosmetique.com" },
+    { "key": "token", "value": "" },
+    { "key": "login", "value": "" },
+    { "key": "password", "value": "" },
+    { "key": "auth_payload", "value": "" },
+    { "key": "ean", "value": "3760123456789" },
+    { "key": "tracky_d", "value": "" },
+    { "key": "tracky_decoded", "value": "", "description": "Dernieres donnees decodees (d) - rempli par le script test" }
+  ],
+  "item": [
+    {
+      "name": "Auth (obtenir le token)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const login = pm.collectionVariables.get('login') || '';",
+              "const pass = pm.collectionVariables.get('password') || '';",
+              "const payload = btoa(unescape(encodeURIComponent(JSON.stringify({ methode: 'auth', login: login, pass: pass }))));",
+              "pm.collectionVariables.set('auth_payload', payload);",
+              "pm.request.body.mode = 'urlencoded';",
+              "pm.request.body.urlencoded = [{ key: 'd', value: payload }];"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const res = pm.response.json();",
+              "if (res.error || res.err) { throw new Error(res.errorMsg || res.error || 'Auth failed'); }",
+              "let payload = res;",
+              "if (res.d) { try { payload = JSON.parse(atob(res.d)); } catch (e) { payload = res; } }",
+              "const t = payload.token || payload.access_token;",
+              "if (t) { pm.collectionVariables.set('token', t); console.log('Token enregistre'); } else { throw new Error('Pas de token'); }"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [{ "key": "d", "value": "{{auth_payload}}" }]
+        },
+        "url": { "raw": "{{base_url}}/api", "host": ["{{base_url}}"], "path": ["api"] },
+        "description": "Authentification CRM. Renseigner login et password. Token enregistre pour les requetes Tracky."
+      },
+      "response": []
+    },
+    {
+      "name": "Tracky - Liste des retours (GET get_retours)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": {
+          "raw": "{{base_url}}/api/tracky.php?methode=get_retours",
+          "host": ["{{base_url}}"],
+          "path": ["api", "tracky.php"],
+          "query": [{ "key": "methode", "value": "get_retours" }]
+        },
+        "description": "Reponse Legacy : body = {\"d\": \"base64(retours[])\"}. Decoder d pour voir les retours."
+      },
+      "response": []
+    },
+    {
+      "name": "Tracky - Liste des magasins (GET get_magasins)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": {
+          "raw": "{{base_url}}/api/tracky.php?methode=get_magasins",
+          "host": ["{{base_url}}"],
+          "path": ["api", "tracky.php"],
+          "query": [{ "key": "methode", "value": "get_magasins" }]
+        },
+        "description": "Reponse : {\"d\": \"base64(magasins[])\"} avec id, nom, code."
+      },
+      "response": []
+    },
+    {
+      "name": "Tracky - Infos produit par EAN (GET get_produit)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": {
+          "raw": "{{base_url}}/api/tracky.php?methode=get_produit&ean={{ean}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "tracky.php"],
+          "query": [
+            { "key": "methode", "value": "get_produit" },
+            { "key": "ean", "value": "{{ean}}" }
+          ]
+        },
+        "description": "Reponse : {\"d\": \"base64({id, nom_produit, reference, ean, prix, retour_autorise, lots_possibles[]})\"}. Variable ean dans la collection."
+      },
+      "response": []
+    },
+    {
+      "name": "Tracky - Stats utilisateur (GET get_stats)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": {
+          "raw": "{{base_url}}/api/tracky.php?methode=get_stats",
+          "host": ["{{base_url}}"],
+          "path": ["api", "tracky.php"],
+          "query": [{ "key": "methode", "value": "get_stats" }]
+        },
+        "description": "Reponse : {\"d\": \"base64({retours_aujourdhui, retours_total})\"}."
+      },
+      "response": []
+    },
+    {
+      "name": "Tracky - Données sync hors-ligne (GET get_sync_data)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": {
+          "raw": "{{base_url}}/api/tracky.php?methode=get_sync_data",
+          "host": ["{{base_url}}"],
+          "path": ["api", "tracky.php"],
+          "query": [{ "key": "methode", "value": "get_sync_data" }]
+        },
+        "description": "Données pour le mode hors-ligne (SQLite). Réponse : {\"d\": \"base64({magasins[], produits[], lots[], count_*})\"} — magasins: id, nom ; produits: ean, nom, ref, prix, retour_autorise ; lots: id_article, num_lot ; count_magasins, count_produits, count_lots."
+      },
+      "response": []
+    },
+    {
+      "name": "Tracky - Sync un retour (POST, format d)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const body = { code_magasin: 'MAG001', num_lot: 'LOT-2025-001', scan_produit: '3760123456789', code_produit: 'REF123', quantite: 2, action_produit: 'recupere', date_retour: '2025-03-16' };",
+              "const payload = btoa(unescape(encodeURIComponent(JSON.stringify(body))));",
+              "pm.collectionVariables.set('tracky_d', payload);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/x-www-form-urlencoded" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [{ "key": "d", "value": "{{tracky_d}}" }]
+        },
+        "url": { "raw": "{{base_url}}/api/tracky.php", "host": ["{{base_url}}"], "path": ["api", "tracky.php"] },
+        "description": "POST avec d = base64(JSON d'un retour). Token en header. Reponse : {\"d\": \"base64({success, id})\"}."
+      },
+      "response": []
+    },
+    {
+      "name": "Tracky - Sync lot de retours (POST, format d)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const body = [",
+              "  { code_magasin: 'MAG001', num_lot: 'LOT-2025-001', scan_produit: '3760123456789', code_produit: 'REF123', quantite: 2, action_produit: 'recupere', date_retour: '2025-03-16' },",
+              "  { code_magasin: 'MAG002', num_lot: 'LOT-2025-002', scan_produit: '3760987654321', code_produit: 'REF456', quantite: 1, action_produit: 'detruit', date_retour: '2025-03-16' }",
+              "];",
+              "const payload = btoa(unescape(encodeURIComponent(JSON.stringify(body))));",
+              "pm.collectionVariables.set('tracky_d', payload);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/x-www-form-urlencoded" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [{ "key": "d", "value": "{{tracky_d}}" }]
+        },
+        "url": { "raw": "{{base_url}}/api/tracky.php", "host": ["{{base_url}}"], "path": ["api", "tracky.php"] },
+        "description": "POST avec d = base64(JSON tableau de retours). Reponse : {\"d\": \"base64({success, ids[], count})\"}."
+      },
+      "response": []
+    }
+  ]
+}

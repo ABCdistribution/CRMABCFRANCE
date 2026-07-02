@@ -1,0 +1,26 @@
+
+#logo-wrapper {
+  width: 600px;
+  text-align: center;
+  position: fixed;
+  top: 150px;
+  left: 50%;
+  margin-left: -300px;
+}
+#logo-wrapper img {
+  margin-bottom: 40px;
+}
+#logo-wrapper h2 {
+  margin-bottom: 50px;
+  font-weight: 400;
+}
+
+
+#logo-wrapper input.abc {
+  display: block;
+  margin: 15px auto;
+  width: 250px;
+}
+#logo-wrapper button {
+  margin-top: 30px;
+}

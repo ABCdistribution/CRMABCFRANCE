@@ -1,0 +1,581 @@
+<?php
+
+set_time_limit(0);
+ini_set('memory_limit','-1');
+define("PROD_MODE", true);
+define("VERBOSE", false);
+
+require_once(APP_ROOT.'vendor'.DIRECTORY_SEPARATOR.'autoload.php');
+use Shuchkin\SimpleXLSX;
+
+global $chunk,$chunkLimit,$chunkPointer;
+$chunk = false;
+$chunkLimit = 1000000;
+$chunkPointer = 0;
+
+class importAS400 {
+
+  public $db;
+  public $path_import;
+  public $file;
+  public $headers;
+
+  public $time_start;
+  public $time_end;
+  public $chronoItem;
+
+
+
+  public static $simultaneousInsert = 500;
+
+  public static function doAjaxImport() {
+    ob_start();
+    importAS400::importClient();
+    importAS400::importArticle();
+    importAS400::importFactures();
+    importAS400::importTarifs();
+    importAS400::importCentrales();
+    importAS400::importReferentiel();
+    importAS400::importCommandes();
+    importAS400::importStockArticle();
+    importAS400::importColis();
+    $str = ob_get_contents();
+    ob_end_clean();
+    die('{ "msg" : "'.rawurlencode($str).'" }');
+  }
+
+  public static function getFiles( $path, $prefix ) {
+    global $db;
+
+  	if( !is_dir($path) || !is_readable($path) ) {
+  		echo "<strong>[ERREUR] $path est innaccessible, veuillez vérifier le chemin ou les points de montages.</strong><br/>";
+  		return false;
+  	}
+
+    $dir = core::getDir($path);
+    $files = [];
+    foreach( $dir as $filename ) {
+      if( strpos(strtolower($filename),".txt.tmp") ) continue;
+      if( strpos($filename,$prefix) === 0 ) {
+        $db->execute("SELECT * FROM log_referentiel WHERE filename = '".$db->escape($filename)."' AND filename NOT LIKE '%STOCK%' ");
+        if( !$db->num() ) $files[] = $path.$filename;
+        else {
+          //echo "Le fichier $filename a déjà été intégré, il sera donc ignoré.<br/>";
+          self::logFile( $path.$filename, false );
+        }
+      }
+    }
+    if( !empty($files) ) $files = self::sortFilesByDate($files);
+    return $files;
+  }
+
+  public static function getStrucMapping( $table ) {
+    global $db;
+    $db->execute("SELECT * FROM $table ORDER BY len_from");
+    return $db->getArray();
+  }
+
+  public static function sortFilesByDate( $files ) {
+    usort($files, function($a, $b) {
+        return filemtime($a) - filemtime($b);
+    });
+    return $files;
+  }
+
+  public static function assocFile( $file, $struc ) {
+    global $db, $chunk,$chunkLimit,$chunkPointer;
+    $lines = file($file);
+    $chunk = count($lines) > $chunkLimit;
+
+    $aff = [];
+    if( $chunk ) {
+      error_log("chunkPointer : ".$chunkPointer);
+    }
+    foreach( $lines as $no_line => $line ) {
+
+      if( $chunk && $no_line < $chunkPointer ) continue;
+
+      $tmp = [];
+      foreach( $struc as $s ) {
+        if( $s['mapping'] == "" ) continue;
+        $val = substr($line, $s['len_from'] - 1, $s['length'] );
+        $val = utf8_encode($val);
+        if( strpos($s['mapping'],"id_") > -1 ) {
+          if( $val == "" ) $val = 0;
+        }
+
+        if( isset($s['decimal_value']) && $s['decimal_value'] > 0 ) {
+          $lenDec = intval($s['decimal_value']);
+          $ent = substr($val,0,strlen($val)-$lenDec);
+          $dec = substr($val,strlen($val)-$lenDec);
+          $val = floatval($ent.".".$dec);
+        }
+
+        $tmp[$s['mapping']] = "'".trim($db->escape($val))."'";
+      }
+      $aff[] = $tmp;
+
+
+      if( $chunk ) {
+        $chunkPointer = $no_line;
+        if( count($aff) >= $chunkLimit ) break;
+      }
+
+      # 20 premieres lignes pour les tests
+      if( !PROD_MODE && count($aff) > 20 ) break;
+    }
+
+    if( $chunk && count($aff) < $chunkLimit ) {
+      $chunkPointer = 0;
+      $chunk = false;
+    }
+
+    return $aff;
+  }
+
+  public static function injectRef( $table, $datas ) {
+    global $db,$chunk,$chunkPointer,$chunkLimit;
+
+    if ( $table == "ref_article" ) {
+      foreach ( $datas as &$a ) {
+        $sousStatut = strtoupper(trim(str_replace("'", "", $a['sous_statut'] ?? '')));
+        $a['retour_autorise'] = ( $sousStatut === 'RAPPE' ) ? "'1'" : "'0'";
+      }
+      unset($a);
+    }
+
+    $fields = array_keys($datas[0]);
+    $query = "";
+    $q = [];
+    $qH = "INSERT INTO $table (".implode(",",$fields).") VALUES ";
+    $cp = 0;
+    $deleted = [];
+    $idsCmdApkUpdated = [];
+    foreach( $datas as $a ) {
+
+      if( $table == "commandes_as400" ) { // Attention doublons !
+        if( trim($a['code_article']) == "" || $a['code_article'] == "0" ) continue;
+        $n = $db->escape(str_replace("'","",$a['numero']));
+        $c = $db->escape(str_replace("'","",$a['code_article']));
+        $db->execute("SELECT id FROM commandes_as400 WHERE numero = '$n' AND code_article = '$c'");
+        if( $db->num() ) { // référence déjà trouvée
+          if( !in_array($n,$deleted) ) { // Si elle n'a pas été suprimée, on check si dates d'annulation > 0
+            if( intval($a['checky']) > 0 && intval($a['checkm']) > 0 && intval($a['checkd']) > 0 ) {
+              // Supression de la commande déjà présente car date d'annulation sur la commande
+              $db->execute("DELETE FROM commandes_as400 WHERE numero = '$n' ");
+              $deleted[] = $n;
+            }
+          } // else déjà insérée
+          continue;
+        }
+      }
+
+      # Injection des N° facture, commande minos, BL & total réel dans les commandes CRM
+      if( $table == "ref_facture" ) {
+        $a['no_crm'] = str_replace(["\r","\n"],"",$a['no_crm']);
+        $a['numero_bl'] = str_replace(["\r","\n"],"",$a['numero_bl']);
+        $id_crm = intval(str_replace("'","",$a['no_crm']));
+        if( $id_crm > 0 && !in_array($id_crm,$idsCmdApkUpdated)) {
+          $no_fac = str_replace(["\r","\n","'"],"",$a['no_facture']);
+          $bl = str_replace(["\r","\n","'"],"",$a['numero_bl']);
+          $no_cmd = str_replace(["\r","\n","'"],"",$a['no_commande']);
+          $mnt_fac = str_replace(["\r","\n","'"],"",$a['montant_facture']);
+          $queryTmp = "
+              UPDATE 
+                commande_apk 
+              SET 
+                no_facture = '".e($no_fac)."',
+                no_commande = '".e($no_cmd)."',
+                total_reel = '".e($mnt_fac)."',
+                bl = '".e($bl)."'
+              WHERE
+                id = $id_crm
+          ";
+          $db->execute($queryTmp);
+          $idsCmdApkUpdated[] = $id_crm;
+        }
+      }
+
+      $q[] = ' ( '.implode(",",$a).' ) ';
+      $cp++;
+      if( $cp > self::$simultaneousInsert ) {
+        $cp = 0;
+        $query = $qH.implode(",",$q).";";
+        if( !PROD_MODE ) echo VERBOSE ? $query."<br/>" : "";
+        else $db->execute($query);
+        $q = [];
+      }
+    }
+    if( $cp > 0 ) {
+      $query = $qH.implode(",",$q).";";
+      if( !PROD_MODE ) echo VERBOSE ? $query."<br/>" : "";
+      else $db->execute($query);
+    }
+
+    if( $table == "ref_client") {
+      foreach ($datas as $a) {
+        if (isset($a['contact_3']) && trim($a['contact_3']) != "" && isset($a['id_as400'])) {
+          $codeProspect = strtolower(trim($a['contact_3']));
+          $db->execute("SELECT id FROM prospect WHERE code_client = '" . $db->escape($a['contact_3']) . "' ");
+          if (!$db->num())
+            continue;
+          $id_prospect = $db->assoc()['id'];
+          $db->execute("UPDATE prospect SET id_as400 = '" . $db->escape($a['id_as400']) . "' WHERE id = $id_prospect");
+        }
+      }
+    }
+
+    return true;
+  }
+
+  public static function logFile( $file, $insert = true ) {
+    if( !PROD_MODE ) return;
+    global $db;
+    $tmp = explode("/",$file);
+    $filename = $db->escape(array_pop($tmp));
+    if( $insert )
+      $db->execute("INSERT INTO log_referentiel (filename,size,nb_lines) VALUES ('$filename','".filesize($file)."','".count(file($file))."')");
+    //@unlink($file);
+    $path = REF_DUMP;
+    if( ENV == "PROD" ) {
+        @rename($file, $path.$filename );
+      if( !file_exists($path.$filename) ) {
+        echo "Impossible de déplacer le fichier $file <br/>";
+      }
+    }
+  }
+
+  public static function dynamicImport( $table, $path, $prefix ) {
+    global $db,$chunk;
+    echo "Début import de : $table...<br/>";
+    $files = self::getFiles( $path, $prefix);
+    if( empty($files) ) {
+      echo "Aucun fichier trouvé <br/>";
+      return;
+    }
+    echo "".count($files)." fichier(s) trouvé(s) <br/>";
+    $struc = self::getStrucMapping("struc_".$table );
+
+    // 💡 Recommandation propre (au lieu du TRUNCATE)
+
+    // Si tu veux quand même nettoyer la table avant un nouvel import, fais-le de manière non bloquante :
+    // $db->execute("DELETE FROM $table;");
+
+    if( PROD_MODE && !in_array($table,["ref_facture","commandes_as400"])) {
+        $q = "DELETE FROM $table;";
+        // $q = "TRUNCATE TABLE $table;";
+        //error_log($q);
+        $db->execute($q);
+    }
+
+    for( $pointer = 0; $pointer < count($files); $pointer++ ) {
+      $file = $files[$pointer];
+      $aff = self::assocFile( $file, $struc );
+      if( $aff === false ) {
+        echo "le fichier $file est trop gros et sera ignoré pour le moment...<br/>";
+        continue;
+      }
+      if( empty($aff) ) {
+        echo "le fichier $file ne contient aucune ligne<br/>";
+        continue;
+      }
+      if( !PROD_MODE && VERBOSE ) {
+        echo $file."<br/>";
+        core::dump($aff);
+      }
+      self::injectRef( $table, $aff );
+      if( $chunk ) {
+        $pointer = $pointer - 1;
+        continue;
+      }
+      self::logFile( $file );
+    }
+    return;
+  }
+
+
+
+  public static function importClient() {
+    self::dynamicImport("ref_client", REF_CLIENTS_PATH, REF_CLIENTS_NAME );
+  }
+
+  public static function importArticle() {
+    self::dynamicImport("ref_article", REF_ARTICLE_PATH, REF_ARTICLE_NAME );
+  }
+
+  public static function importFactures() {
+    self::dynamicImport("ref_facture", REF_FACTURES_PATH, REF_FACTURES_NAME );
+  }
+
+  public static function importTarifs() {
+    self::dynamicImport("ref_tarif", REF_TARIFS_PATH, REF_TARIFS_NAME );
+  }
+
+  public static function importCentrales() {
+    self::dynamicImport("ref_centrale", REF_ARBO_PATH, REF_ARBO_NAME );
+  }
+
+  public static function importReferentiel() {
+    self::dynamicImport("referentiels", REF_PARAMS_PATH, REF_PARAMS_NAME );
+  }
+
+  public static function importCommandes() {
+    $p = ( ENV == "DEV" ? '/home/TESTMINACRM/' : '/home/MINACRM/' );
+    self::dynamicImport("commandes_as400", $p, "CDJ" );
+
+    // Sommes des commandes
+    global $db;
+    $dd = date('Y-m-d');
+    $db->execute("
+      SELECT DISTINCT 
+        numero, id_repr, type_cmd, CONCAT(annee_annul,'-',mois_annul,'-',jour_annul) as date_commande
+      FROM commandes_as400 
+      WHERE 
+        date_creation LIKE '$dd%'
+        AND code_article != ''
+    ");
+    $nums = [];
+    $rep = [];
+    $dates = [];
+    $types = [];
+    while( $r = $db->assoc() ) {
+      $rep[$r['numero']] = $r['id_repr'];
+      $dates[$r['numero']] = $r['date_commande'];
+      $types[$r['numero']] = $r['type_cmd'];
+      $nums[] = $r['numero'];
+    }
+    if( empty($nums) ) return;
+
+    foreach( $nums as $numero ) {
+      $q = "SELECT SUM(CAST(montant AS DECIMAL(18,2))) as total FROM `commandes_as400` WHERE numero = '$numero'";
+      $db->execute($q);
+      $total = $db->assoc()['total'];
+      $id_rep = $rep[$numero];
+
+      $db->execute("SELECT id FROM commandes_as400_total WHERE numero = '$numero'");
+      if( $db->num() ) {
+        $id = $db->assoc()['id'];
+        $db->execute("UPDATE commandes_as400_total SET total = '".$total."' WHERE id = $id");
+      }
+      else {
+        $db->execute("
+          INSERT INTO commandes_as400_total
+          (numero,date_commande,total,id_repr,type_cmd)
+          VALUES
+          (
+            '$numero', '".$dates[$numero]."', '$total', '$id_rep', '".$types[$numero]."'
+          )
+        ");
+      }
+    }
+
+
+
+  }  
+
+
+  public static function importStockArticle() {
+    global $db;
+    echo "Début import de : ref_article_stock...<br/>";
+    $mapping = [
+      "id_as400" => 0,
+      "stock" => 2
+    ];
+
+    $p = ( ENV == "DEV" ? '/home/TESTMINACRM/' : '/home/MINACRM/' );
+    $files = self::getFiles($p,'INTERFACE_STOCK');
+    if( !$files || empty($files) ) {
+      echo "Aucun fichier trouvé";
+      return;
+    }
+
+    $inserts = $updates = [];
+    $refs = self::getStockRefs();
+
+    foreach($files as $file ) {
+      echo "Import de : ".basename($file);
+      $datas = self::readStockFile($file);
+      if( !$datas ) continue;
+      foreach( $datas as $line ) {
+        if( !isset($line[$mapping['id_as400']]) || trim($line[$mapping['id_as400']]) == "" ) continue;
+        if( !in_array($line[$mapping['id_as400']],$refs) )
+          $inserts[$line[$mapping['id_as400']]] = $line[$mapping['stock']];
+        else
+          $updates[$line[$mapping['id_as400']]] = $line[$mapping['stock']];
+      }
+
+      # Insertions
+      if( count($inserts) > 0 ) {
+        $tmp = [];
+        foreach( $inserts as $id_as400 => $qte ) 
+          $tmp[] = "('".$db->escape($id_as400)."', ".intval($qte).")";
+        $db->execute("INSERT INTO ref_article_stock (id_as400,stock) VALUES ".implode(",",$tmp));
+      }
+      # Updates
+      if( count($updates) > 0 ) {
+        $tmp = [];
+        foreach( $updates as $id_as400 => $qte ) 
+          $db->execute("UPDATE ref_article_stock SET stock = ".intval($qte)." WHERE id_as400 = '".$db->escape($id_as400)."' ");
+      }      
+
+      echo count($inserts)." insert, ".count($updates)." updates<br/>";
+      self::logFile( $file );
+      //self::endStockLog($file);
+    }
+  }
+
+  public static function isExcel( $file ) {
+    return strpos( strtolower($file) ,".xls") > - 1;
+  }
+
+  public static function readStockFile($file) {
+
+    if( self::isExcel($file) ) {
+      if ( $xlsx = SimpleXLSX::parse($file) ) {
+          return $xlsx->rows();
+      } else {
+          die( SimpleXLSX::parseError() );
+      }
+    }
+    else {
+      try { $fc = file($file); }
+      catch( Exception $e ) { 
+        return self::endStockLog($file);
+        throw $e->getMessage(); 
+      }
+      if( count($fc) < 2 ) return self::endStockLog($file,"Fichier vide");
+    }
+
+    $fl = str_replace('"',"",trim(array_shift($fc)));
+    $fl = mb_convert_encoding($fl, 'UTF-8', mb_detect_encoding($fl));
+    $headers = explode(";",$fl);
+    if( count($headers) != 3 ) return self::endStockLog($file,"Le fichier ne contient pas le bon nombre de colonnes");
+    $datas = [];
+    foreach( $fc as $nb_line => $line ) {
+      $line = mb_convert_encoding(trim($line), 'UTF-8', mb_detect_encoding($line));
+      $line = str_replace('"','',$line);
+      if( trim($line) == "" ) continue;
+      $tmp = explode(";",$line);
+      $tmpLine = [];
+      foreach($headers as $k=>$h ) {
+        if( !isset($tmp[$k]) ) return self::endStockLog($file,"La ligne $nb_line ne contient pas le bon nombre de colonnes");
+        $tmpLine[$h] = $tmp[$k];
+      }
+      $datas[] = $tmpLine;
+    }
+    return $datas;
+  }
+
+  public static function getStockRefs() {
+    global $db;
+    $refs = [];
+    $db->execute("SELECT id_as400 FROM ref_article_stock");
+    while( $r =  $db->assoc() ) $refs[] = $r['id_as400'];
+    return $refs;
+  }
+
+  public static function endStockLog( $file, $msg = "" ) {
+    if( $msg != "" ) echo $msg;
+    unlink($file);
+    return false;
+  }
+
+  public static function importColis() {
+    $files = [];
+    foreach( scandir(REF_ARTICLE_PATH) as $name ) 
+      if( mb_strpos(mb_strtolower($name),'contenant') > - 1 ) 
+        $files[] = REF_ARTICLE_PATH.$name;
+    if( empty($files) ) {
+      echo 'Aucun fichier de colis a intégrer.';
+      return;
+    }
+    foreach( $files as $file ) {
+      self::importColi($file);
+      if( is_writable($file) ) unlink($file);
+      else echo "Impossible de supprimer le document : $file";
+    }
+    return;
+  }
+  public static function importColi( $path ) {
+    global $db;
+    if( !file_exists($path) || !is_readable($path) ) return;
+    $content = file($path);
+    $headers = [];
+    foreach( $content as $k=>$e ) {
+      $tab = explode(";",str_replace('"','',trim($e)));
+      if( $k == 0 ) {
+        $headers = $tab;
+        unset($content[$k]);
+      }
+      else {
+        $content[$k] = [];
+        foreach( $headers as $a=>$b ) {
+          $content[$k][$b] = $tab[$a];
+        }
+      }
+    }
+    $colis = [];
+
+    $stats = [
+      "commandes" => 0,
+      "colis" => 0,
+      "produits" => 0
+    ];
+    foreach( $content as $e ) {
+        $key = $e["No Ordre Sortie"];
+        if( !isset($colis[$key]) ) {
+          $stats['commandes']++;
+          $colis[$key] = [
+             "colis"  => 0,
+             "client" => $e['Code Client'],
+             "produits" => 0,
+             "codes" => []
+          ];
+        }
+
+        $colis[$key]['colis']++;
+        $colis[$key]['produits'] += $e['Qté Réelle Unitaire'];
+        $colis[$key]['codes'][] = ['code' => $e['Sscc'], 'code2' => $e['No Contenant']];
+
+        $stats['colis']++;
+        $stats['produits'] += $e['Qté Réelle Unitaire'];
+    }
+
+    // Insertion des colis
+    foreach( $colis as $k=>$e ) {
+      $db->execute("SELECT id FROM commande_colis WHERE no_logis = '".e($k)."' AND deleted = 0");
+      if( !$db->num() ) { // N° logis n'existe pas en base
+          $db->execute("INSERT INTO commande_colis (colis,id_client,no_logis,produits) VALUES (".$e['colis'].",'".e($e['client'])."','".e($k)."',".$e['produits'].")");
+          $id_commande_colis = $db->lastId();
+          foreach( $e['codes'] as $c ) {
+            $db->execute("INSERT INTO commande_colis_codes (id_commande_colis,code,code2) VALUES ($id_commande_colis,'".e($c['code'])."','".e($c['code2'])."')");
+          }
+      }
+      else { // N° logis existe en base
+        $id_commande_colis = $db->assoc()['id'];
+        foreach( $e['codes'] as $c ) {
+            $db->execute("
+              SELECT id FROM commande_colis_codes 
+              WHERE  
+                id_commande_colis = $id_commande_colis 
+                AND ( code = '".e($c['code'])."' OR code2 = '".e($c['code2'])."'  )
+            ");
+            if( !$db->num() ) {
+              $db->execute("INSERT INTO commande_colis_codes (id_commande_colis,code,code2) VALUES ($id_commande_colis,'".e($c['code'])."','".e($c['code2'])."')");
+            }
+        }
+      }
+    }
+
+    echo "Fin d'intégration des commandes clients (colis) : <br/>";
+    echo $stats['commandes']." commandes<br/>";
+    echo $stats['colis']." colis<br/>";
+    echo $stats['produits']." produits<br/>";
+
+    return;
+  }
+
+}
+
+
+?>
