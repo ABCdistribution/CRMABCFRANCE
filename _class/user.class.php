@@ -714,7 +714,7 @@ class user {
 			AND deleted = 0
 		");
 
-		$deleted = $db->affectedRows();
+		$deleted = mysqli_affected_rows($db->link);
 		error_log("Plannings supprimés: $deleted");
 
 		return $deleted;
