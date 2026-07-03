@@ -1,0 +1,28 @@
+{
+  "watch": [
+    ".",
+    "config",
+    "middleware",
+    "routes"
+  ],
+  "ext": "js,json",
+  "ignore": [
+    "node_modules",
+    "test",
+    "*.test.js",
+    "*.spec.js",
+    "logs",
+    "tmp"
+  ],
+  "delay": 1000,
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "verbose": true,
+  "restartable": "rs",
+  "colours": true
+}
+
+
+
+

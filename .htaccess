@@ -1,0 +1,12 @@
+Options +FollowSymlinks
+
+#AuthName "Espace en travaux"
+#AuthType Basic
+#AuthUserFile "/var/www/gescom/.htpasswd"
+#Require valid-user
+
+
+RewriteEngine On
+
+RewriteRule ^(css|lib|js|img|snew.png|datas|u.png|dist|scripts|refonte)($|/) - [L]
+RewriteRule ^(.*) index.php?URI_STRING=$1 [QSA,L]

@@ -1,0 +1,26 @@
+/* Navigation responsive styles */
+.mobile-menu-button {
+  display: none;
+}
+
+.desktop-nav {
+  display: flex;
+}
+
+.desktop-user-menu {
+  display: flex;
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-button {
+    display: flex;
+  }
+  
+  .desktop-nav {
+    display: none;
+  }
+  
+  .desktop-user-menu {
+    display: none;
+  }
+}

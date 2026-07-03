@@ -1,0 +1,11 @@
+#datas
+/datas/
+/tmp/
+
+# Exception pour le dossier refonte (build sauvegardé)
+!/refonte/
+
+
+
+# Fichiers sensibles Apache
+.htpasswd

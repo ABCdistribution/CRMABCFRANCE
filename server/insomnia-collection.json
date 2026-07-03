@@ -1,0 +1,577 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2025-01-27T10:00:00.000Z",
+  "__export_source": "insomnia.desktop.app:v2023.5.8",
+  "resources": [
+    {
+      "_id": "req_auth_login",
+      "parentId": "fld_auth",
+      "modified": 1706352000000,
+      "created": 1706352000000,
+      "url": "{{ _.base_url }}/api/auth/login",
+      "name": "Login",
+      "description": "Authentification utilisateur",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"login\": \"utilisateur\",\n  \"pass\": \"motdepasse\",\n  \"device\": \"Insomnia Test\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "parameters": [],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_auth_check_token",
+      "parentId": "fld_auth",
+      "modified": 1706352000000,
+      "created": 1706352000000,
+      "url": "{{ _.base_url }}/api/auth/check-token",
+      "name": "Check Token",
+      "description": "Vérification de la validité du token",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"token\": \"{{ _.auth_token }}\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "parameters": [],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_auth_logout",
+      "parentId": "fld_auth",
+      "modified": 1706352000000,
+      "created": 1706352000000,
+      "url": "{{ _.base_url }}/api/auth/logout",
+      "name": "Logout",
+      "description": "Déconnexion utilisateur",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"token\": \"{{ _.auth_token }}\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "parameters": [],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_health_check",
+      "parentId": "fld_health",
+      "modified": 1706352000000,
+      "created": 1706352000000,
+      "url": "{{ _.base_url }}/api/health",
+      "name": "Health Check",
+      "description": "Vérification de l'état du serveur",
+      "method": "GET",
+      "body": {},
+      "headers": [],
+      "authentication": {},
+      "parameters": [],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_test_db",
+      "parentId": "fld_health",
+      "modified": 1706352000000,
+      "created": 1706352000000,
+      "url": "{{ _.base_url }}/api/test-db",
+      "name": "Test Database",
+      "description": "Test de connexion à la base de données",
+      "method": "GET",
+      "body": {},
+      "headers": [],
+      "authentication": {},
+      "parameters": [],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_clients_list",
+      "parentId": "fld_clients",
+      "modified": 1706352000000,
+      "created": 1706352000000,
+      "url": "{{ _.base_url }}/api/clients?limit=10&offset=0",
+      "name": "Liste des clients",
+      "description": "Récupération de la liste des clients",
+      "method": "GET",
+      "body": {},
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.auth_token }}"
+        }
+      ],
+      "authentication": {},
+      "parameters": [
+        {
+          "name": "limit",
+          "value": "10",
+          "description": "Nombre d'éléments par page"
+        },
+        {
+          "name": "offset",
+          "value": "0",
+          "description": "Décalage pour la pagination"
+        }
+      ],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_clients_details",
+      "parentId": "fld_clients",
+      "modified": 1706352000000,
+      "created": 1706352000000,
+      "url": "{{ _.base_url }}/api/clients/CLIENT123",
+      "name": "Détails d'un client",
+      "description": "Récupération des détails d'un client",
+      "method": "GET",
+      "body": {},
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.auth_token }}"
+        }
+      ],
+      "authentication": {},
+      "parameters": [],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_clients_stats",
+      "parentId": "fld_clients",
+      "modified": 1706352000000,
+      "created": 1706352000000,
+      "url": "{{ _.base_url }}/api/clients/CLIENT123/stats",
+      "name": "Statistiques client",
+      "description": "Statistiques d'un client",
+      "method": "GET",
+      "body": {},
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.auth_token }}"
+        }
+      ],
+      "authentication": {},
+      "parameters": [],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_clients_add_contact",
+      "parentId": "fld_clients",
+      "modified": 1706352000000,
+      "created": 1706352000000,
+      "url": "{{ _.base_url }}/api/clients/CLIENT123/contacts",
+      "name": "Ajouter un contact",
+      "description": "Ajout d'un contact client",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nom\": \"Dupont\",\n  \"prenom\": \"Jean\",\n  \"fonction\": \"Directeur\",\n  \"telephone\": \"0123456789\",\n  \"mail\": \"jean.dupont@example.com\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.auth_token }}"
+        }
+      ],
+      "authentication": {},
+      "parameters": [],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_commandes_list",
+      "parentId": "fld_commandes",
+      "modified": 1706352000000,
+      "created": 1706352000000,
+      "url": "{{ _.base_url }}/api/commandes?limit=10&offset=0",
+      "name": "Liste des commandes",
+      "description": "Récupération de l'historique des commandes",
+      "method": "GET",
+      "body": {},
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.auth_token }}"
+        }
+      ],
+      "authentication": {},
+      "parameters": [
+        {
+          "name": "limit",
+          "value": "10",
+          "description": "Nombre d'éléments par page"
+        },
+        {
+          "name": "offset",
+          "value": "0",
+          "description": "Décalage pour la pagination"
+        }
+      ],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_commandes_details",
+      "parentId": "fld_commandes",
+      "modified": 1706352000000,
+      "created": 1706352000000,
+      "url": "{{ _.base_url }}/api/commandes/CMD123",
+      "name": "Détails d'une commande",
+      "description": "Récupération des détails d'une commande",
+      "method": "GET",
+      "body": {},
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.auth_token }}"
+        }
+      ],
+      "authentication": {},
+      "parameters": [],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_commandes_create",
+      "parentId": "fld_commandes",
+      "modified": 1706352000000,
+      "created": 1706352000000,
+      "url": "{{ _.base_url }}/api/commandes",
+      "name": "Créer une commande",
+      "description": "Création d'une nouvelle commande",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"id_client\": \"CLIENT123\",\n  \"date_livraison\": \"2025-09-10\",\n  \"commentaire\": \"Commande test\",\n  \"lignes\": [\n    {\n      \"id_produit\": 1,\n      \"quantite\": 10\n    }\n  ]\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.auth_token }}"
+        }
+      ],
+      "authentication": {},
+      "parameters": [],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_commandes_update_status",
+      "parentId": "fld_commandes",
+      "modified": 1706352000000,
+      "created": 1706352000000,
+      "url": "{{ _.base_url }}/api/commandes/CMD123/status",
+      "name": "Mettre à jour le statut",
+      "description": "Mise à jour du statut d'une commande",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"statut\": \"CONFIRMEE\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.auth_token }}"
+        }
+      ],
+      "authentication": {},
+      "parameters": [],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_visites_client",
+      "parentId": "fld_visites",
+      "modified": 1706352000000,
+      "created": 1706352000000,
+      "url": "{{ _.base_url }}/api/visites/client/CLIENT123?limit=10&offset=0",
+      "name": "Visites d'un client",
+      "description": "Récupération des visites d'un client",
+      "method": "GET",
+      "body": {},
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.auth_token }}"
+        }
+      ],
+      "authentication": {},
+      "parameters": [
+        {
+          "name": "limit",
+          "value": "10",
+          "description": "Nombre d'éléments par page"
+        },
+        {
+          "name": "offset",
+          "value": "0",
+          "description": "Décalage pour la pagination"
+        }
+      ],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_visites_futures",
+      "parentId": "fld_visites",
+      "modified": 1706352000000,
+      "created": 1706352000000,
+      "url": "{{ _.base_url }}/api/visites/futures",
+      "name": "Futures visites",
+      "description": "Récupération des futures visites",
+      "method": "GET",
+      "body": {},
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.auth_token }}"
+        }
+      ],
+      "authentication": {},
+      "parameters": [],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_visites_create",
+      "parentId": "fld_visites",
+      "modified": 1706352000000,
+      "created": 1706352000000,
+      "url": "{{ _.base_url }}/api/visites",
+      "name": "Créer une visite",
+      "description": "Création d'une nouvelle visite",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"id_client\": \"CLIENT123\",\n  \"id_commande\": \"CMD123\",\n  \"no_cmd\": \"CMD-2025-001\",\n  \"pmc_state\": \"Bon état\",\n  \"pmc_coms\": \"Commentaires PMC\",\n  \"pem\": true,\n  \"alerte_raison\": [\"Maintenance prévue\"],\n  \"alerte_obs\": \"Observations\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.auth_token }}"
+        }
+      ],
+      "authentication": {},
+      "parameters": [],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_auth",
+      "parentId": "wrk_api_crm",
+      "modified": 1706352000000,
+      "created": 1706352000000,
+      "name": "🔐 Authentification",
+      "description": "Endpoints d'authentification",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1706352000000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "fld_health",
+      "parentId": "wrk_api_crm",
+      "modified": 1706352000000,
+      "created": 1706352000000,
+      "name": "🏥 Santé du système",
+      "description": "Tests de santé et de connectivité",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1706352000000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "fld_clients",
+      "parentId": "wrk_api_crm",
+      "modified": 1706352000000,
+      "created": 1706352000000,
+      "name": "👥 Clients",
+      "description": "Gestion des clients",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1706352000000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "fld_commandes",
+      "parentId": "wrk_api_crm",
+      "modified": 1706352000000,
+      "created": 1706352000000,
+      "name": "📦 Commandes",
+      "description": "Gestion des commandes",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1706352000000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "fld_visites",
+      "parentId": "wrk_api_crm",
+      "modified": 1706352000000,
+      "created": 1706352000000,
+      "name": "🏢 Visites",
+      "description": "Gestion des visites",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1706352000000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "wrk_api_crm",
+      "parentId": null,
+      "modified": 1706352000000,
+      "created": 1706352000000,
+      "name": "API CRM - Gescom",
+      "description": "Collection Insomnia pour tester l'API CRM",
+      "scope": "collection",
+      "_type": "workspace"
+    },
+    {
+      "_id": "env_base",
+      "parentId": "wrk_api_crm",
+      "modified": 1706352000000,
+      "created": 1706352000000,
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:3001",
+        "auth_token": ""
+      },
+      "dataPropertyOrder": {
+        "&": ["base_url", "auth_token"]
+      },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1706352000000,
+      "_type": "environment"
+    }
+  ]
+}
+
+
+
+
+

@@ -1,0 +1,412 @@
+{
+  "info": {
+    "name": "API CRM - Gescom",
+    "description": "Collection Postman pour tester l'API CRM",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "🔐 Authentification",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"utilisateur\",\n  \"pass\": \"motdepasse\",\n  \"device\": \"Postman Test\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.token) {",
+                  "        pm.collectionVariables.set('authToken', response.token);",
+                  "        console.log('Token sauvegardé:', response.token);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Check Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{authToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/check-token",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "check-token"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{authToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏥 Santé du système",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "health"]
+            }
+          }
+        },
+        {
+          "name": "Test Database",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/test-db",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "test-db"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👥 Clients",
+      "item": [
+        {
+          "name": "Liste des clients",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clients?limit=10&offset=0",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clients"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Détails d'un client",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clients/CLIENT123",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clients", "CLIENT123"]
+            }
+          }
+        },
+        {
+          "name": "Statistiques client",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clients/CLIENT123/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clients", "CLIENT123", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Ajouter un contact",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Dupont\",\n  \"prenom\": \"Jean\",\n  \"fonction\": \"Directeur\",\n  \"telephone\": \"0123456789\",\n  \"mail\": \"jean.dupont@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/clients/CLIENT123/contacts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clients", "CLIENT123", "contacts"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📦 Commandes",
+      "item": [
+        {
+          "name": "Liste des commandes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/commandes?limit=10&offset=0",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "commandes"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Détails d'une commande",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/commandes/CMD123",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "commandes", "CMD123"]
+            }
+          }
+        },
+        {
+          "name": "Créer une commande",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_client\": \"CLIENT123\",\n  \"date_livraison\": \"2025-09-10\",\n  \"commentaire\": \"Commande test\",\n  \"lignes\": [\n    {\n      \"id_produit\": 1,\n      \"quantite\": 10\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/commandes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "commandes"]
+            }
+          }
+        },
+        {
+          "name": "Mettre à jour le statut",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statut\": \"CONFIRMEE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/commandes/CMD123/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "commandes", "CMD123", "status"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏢 Visites",
+      "item": [
+        {
+          "name": "Visites d'un client",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/visites/client/CLIENT123?limit=10&offset=0",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "visites", "client", "CLIENT123"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Créer une visite",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_client\": \"CLIENT123\",\n  \"id_commande\": \"CMD123\",\n  \"no_cmd\": \"CMD-2025-001\",\n  \"pmc_state\": \"Bon état\",\n  \"pmc_coms\": \"Commentaires PMC\",\n  \"pem\": true,\n  \"alerte_raison\": [\"Maintenance prévue\"],\n  \"alerte_obs\": \"Observations\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/visites",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "visites"]
+            }
+          }
+        },
+        {
+          "name": "Futures visites",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/visites/futures",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "visites", "futures"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+
+
+
+
+
