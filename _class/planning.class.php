@@ -131,6 +131,9 @@ class planning {
     if( $user['id_repr'] < 1 ) {
       $rep = ["isOK"=>false,"msg"=>"Identifiant de representant manquant"];
     }
+    else if( $user['actif'] != 1 ) {
+      $rep = ["isOK"=>false,"msg"=>"Ce promoteur n'est pas actif"];
+    }
     else {
       $pl = self::getPlanningFromIdRepr($user['id_repr']);
       if( empty($pl) || (defined('APK_VERSION') && APK_VERSION < 0.40 ) ) {
@@ -251,7 +254,7 @@ class planning {
 
   public static function getPlanningRepr() {
     global $db;
-    $db->execute("SELECT id,id_repr,displayname FROM user WHERE id_repr > 0 ORDER BY displayname");
+    $db->execute("SELECT id,id_repr,displayname FROM user WHERE id_repr > 0 AND actif = 1 ORDER BY displayname");
     $rep = [0=>""];
     while( $r = $db->assoc() )
       $rep[$r['id']]= [

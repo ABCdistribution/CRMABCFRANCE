@@ -68,8 +68,10 @@
         [ "title" => "Rappels produits", "url" => "Retours", "id_droit" => 28 ],
         [ "title" => l("menu-titre-visites"), "url" => "Visites", "id_droit" => 5 ],
         [ "title" => l("menu-titre-visites-juva"), "url" => "Visitesjuva", "id_droit" => 5 ],
-        [ "title" => l("menu-titre-planning"), "url" => "Planning", "id_droit" => 17 ],
+        // [ "title" => l("menu-titre-planning"), "url" => "Planning", "id_droit" => 17 ],
+        [ "title" => "Vue Planning", "url" => "Planning_View", "id_droit" => 17 ],
         [ "title" => l("menu-titre-planning-validation"), "url" => "ValidationPlanning", "id_droit" => 25 ],
+        [ "title" => "Gestion du planning", "url" => "Gestion_Secteur", "id_droit" => 25 ],
       ],
       '<i class="fas fa-user-tie"></i> '.l("menu-titre-cs") => [
         [ "title" => l("menu-titre-prospects-encours"), "url" => "Prospects", "id_droit" => 20 ],
